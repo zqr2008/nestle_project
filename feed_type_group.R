@@ -57,9 +57,6 @@ group<- group_ration %>%
                                 final_ratio>0.85~"FF",
                                 final_ratio>0 &final_ratio<0.85~"MF")) 
 
-#CHN001-100046被去除因为没有第一次数据
-#CHN001-100061分组有问题，因为3月龄写的混合喂养，但是没有写奶粉的量和次数
-
 
 #导出
 write.table(group,file="C:/Users/zhaiqiangrong/Desktop/雀巢/group.csv",sep=",",fileEncoding="GBK",row.names = F)

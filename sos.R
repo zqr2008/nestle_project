@@ -74,7 +74,7 @@ for (x in (1:5)){
     dplyr::mutate_at(.vars =vars(1,2), .fun=as.character) %>%
     mutate(SiteName=case_when(str_detect(SiteName,"RADIUS")~"桡骨 (左)",
                               str_detect(SiteName,"TIBIA")~"胫骨 (左)"))
-  
+
   #merge id for each pair
   df<- data %>% left_join(id_sheet,by="ID") %>% 
     select(PatientId,ResultDate,SiteName,VelocityMax,VelocityAverage,VelocityMin,ZScore) %>%
