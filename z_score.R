@@ -22,7 +22,6 @@ wei_and_hei <- read_excel("C:/Users/zhaiqiangrong/Desktop/雀巢/2027NRC_Data tr
 QS2<-read_excel("C:/Users/zhaiqiangrong/Desktop/雀巢/2027NRC_Data transfer_to BGI_20220729/2027NRC_FormExcel_2.0_20220729.xlsx", 
                sheet = "QS2")
 
-
 #性别分组等信息整理
 names(gender)[3]<-"id"
 names(gender)[20]<-"grouping"
@@ -31,9 +30,9 @@ names(gender)[18]<-"delivery_mode"
 
 #民族的字符串统一
 gender<- gender %>% mutate(eth=case_when(str_detect(`民族(ETHNICITY)`,"汉")~"汉族",
-                                           str_detect(`民族(ETHNICITY)`,"满")~"满族",
-                                           str_detect(`民族(ETHNICITY)`,"蒙古")~"蒙古族",
-                                           str_detect(`民族(ETHNICITY)`,"回")~"回族"))
+                                         str_detect(`民族(ETHNICITY)`,"满")~"满族",
+                                         str_detect(`民族(ETHNICITY)`,"蒙古")~"蒙古族",
+                                         str_detect(`民族(ETHNICITY)`,"回")~"回族"))
 #去除无关信息，只保留需要的人口学参数
 gender2<-gender[,c(3,20,13,18,21)]
 #把性别统一编码
@@ -42,10 +41,13 @@ gender2$gender[gender2$gender=="女"]<-"2"
 
 
 #身高体重等信息整理
+wei_and_hei <- wei_and_hei %>% 
+               filter(数据节!= "G1-V6 (9月龄 ± 15天)") %>%
+               dplyr::mutate_at(.vars =vars(8,15), .fun=as.factor) 
+#变量转换
 wei_and_hei <- wei_and_hei %>%
-  dplyr::mutate_at(.vars =vars(8,15), .fun=as.factor) #变量转换
-wei_and_hei <- wei_and_hei %>%
-  dplyr::mutate_at(.vars =vars(16), .fun=as.numeric) #数值型变量转换
+               dplyr::mutate_at(.vars =vars(16), .fun=as.numeric) #数值型变量转换
+
 #统一名称
 names(wei_and_hei)[15]<-"param"
 names(wei_and_hei)[16]<-"value"
@@ -98,18 +100,18 @@ names(QS2)[16]<-"child_number"
 names(QS2)[17]<-"education"
 #只需要QS2里面的教育程度和孩子数量，把其他去重
 QS2<- QS2 %>% select(id,child_number,education) %>%
-  distinct(id,.keep_all = T)
+      distinct(id,.keep_all = T)
 summary1<- cbind(simple3,z_score) %>% #simple3代之前合成的基本信息表， z_score代表用anthro包计算的zscore矩阵
-  left_join(group2,by="id") %>% #group2是用group.R文件计算出的feeding type分组
-  left_join(QS2,by="id") %>%  #QS2是母亲的教育、孩子数量 
-  mutate(health=case_when(delivery_mode=="顺产" &  #按照定义把健康的挑出来
-                            feeding_type=="BF" & 
-                            abs(zlen)<2 &
-                            abs(zwei)<2 &
-                            abs(zwfl)<2 ~"healthy"))
+           left_join(group2,by="id") %>% #group2是用group.R文件计算出的feeding type分组
+           left_join(QS2,by="id") %>%  #QS2是母亲的教育、孩子数量 
+           mutate(health=case_when(delivery_mode=="顺产" &  #按照定义把健康的挑出来
+                                   feeding_type=="BF" & 
+                                   abs(zlen)<2 &
+                                   abs(zwei)<2 &
+                                   abs(zwfl)<2 ~"healthy")) 
+ 
 #三张表合起来 
-
-summary1$health[is.na(summary1$health)]<-"unhealthy"
+summary1$health[is.na(summary1$health)]<-"unhealthy" 
         
 #输出大表结果
 write.table(summary1,file="C:/Users/zhaiqiangrong/Desktop/雀巢/summary1.csv",sep=",",fileEncoding="GBK",row.names = F)
