@@ -16,8 +16,8 @@ QS12 <- read_excel("C:/Users/zhaiqiangrong/Desktop/雀巢/2027NRC_Data transfer_
                    sheet = "QS12")
 QS12_label <- read_excel("C:/Users/zhaiqiangrong/Desktop/雀巢/2027NRC_Data transfer_to BGI_20220831/2027NRC_FormExcel_3.0_20220831（以变量标签名呈现）.xlsx", 
                          sheet = "QS12",col_names = F)
-#第一个输入文件QS11是一张是以变量代码呈现的sheet,
-#第二个输入文件QS11_label是以变量标签名呈现的sheet
+
+#第一个输入文件QS11是一张是以变量代码呈现的sheet,第二个输入文件QS11_label是以变量标签名呈现的sheet
 #一定要保证输入的顺序，同时两个文件是严格对应sheet
 QS11 <- function_transfer(QS11,QS11_label)
 QS12 <- function_transfer(QS12,QS12_label)
@@ -41,7 +41,6 @@ QS12<- QS12%>%
          prebiotics_fiber = `它是否含有低聚糖/益生元/纤维?(QS12CON2)`,
          hydrolyzed_protein = `它是否含有水解蛋白?(QS12CON3)`,
          formula_content = `奶粉是基于哪种原料生产的?(QS12INGR)`)
-
 
 #计算原则
 #所需随访时点：G1-V2（1月龄），G1-V3（3月龄），G1-V4（4月龄）.

@@ -2,23 +2,29 @@ library(tableone)
 library(readxl)
 library(tidyverse)
 
-
+edc <- "C:/Users/zhaiqiangrong/Desktop/雀巢/2027NRC_Data transfer_to BGI_20220831/2027NRC_FormExcel_3.0_20220831（以变量代码呈现）.xlsx"
+excel_sheets(path = edc)
+edc_label <- "C:/Users/zhaiqiangrong/Desktop/雀巢/2027NRC_Data transfer_to BGI_20220831/2027NRC_FormExcel_3.0_20220831（以变量标签名呈现）.xlsx"
+excel_sheets(path = edc_label)
 
 #粪便样本采集数据集  对应co-primary endpoints-Microbiome maturation trajectory
-LB3 <- read_excel("C:/Users/zhaiqiangrong/Desktop/雀巢/2027NRC_Data transfer_to BGI_20220729/2027NRC_FormExcel_2.0_20220729.xlsx", 
-                  sheet = "LB_SAMP3")
+LB3 <- read_excel(path = edc, sheet = "LB_SAMP3")
 #是否进行了婴儿调查问卷 对应co-primary endpoints-infant questionnaires
-QS9 <- read_excel("C:/Users/zhaiqiangrong/Desktop/雀巢/2027NRC_Data transfer_to BGI_20220729/2027NRC_FormExcel_2.0_20220729.xlsx", 
-                 sheet = "QS9")
+QS9 <- read_excel(path = edc, sheet = "QS9")
 #骨密度数据集 对应co-primary endpoints-SoS measures of tibia
-sos <- read_excel("C:/Users/zhaiqiangrong/Desktop/雀巢/2027NRC_Data transfer_to BGI_20220729/2027NRC_FormExcel_2.0_20220729.xlsx", 
-                  sheet = "MO_SOS")
+sos <- read_excel(path = edc, sheet = "MO_SOS")
 #胫骨桡骨测量  对应co-primary endpoints-Length of tibia bone
-FA <- read_excel("C:/Users/zhaiqiangrong/Desktop/雀巢/2027NRC_Data transfer_to BGI_20220729/2027NRC_FormExcel_2.0_20220729.xlsx", 
-                 sheet = "FA")
+FA <- read_excel(path = edc,sheet = "FA")
 #是否进行母乳采集  对应co-primary endpoints- Levels of HMOs
-LB_RES <- read_excel("C:/Users/zhaiqiangrong/Desktop/雀巢/2027NRC_Data transfer_to BGI_20220729/2027NRC_FormExcel_2.0_20220729.xlsx", 
-                  sheet = "LB_RES")
+LB_RES <- read_excel(path = edc,sheet = "LB_RES")
+
+LB3_label <- read_excel(path = edc_label, sheet = "LB_SAMP3")
+QS9_label <- read_excel(path = edc_label, sheet = "QS9")
+sos_label<- read_excel(path = edc_label, sheet = "MO_SOS")
+FA_label<- read_excel(path = edc_label, sheet = "FA")
+LB_RES_label <- read_excel(path = edc_label, sheet = "LB_RES")
+
+LB3 <- function_transfer(LB3,LB3_label)
 
 #原则筛选这五个数据集里面“是”或非缺失部分
 LB3 <- LB3 %>% 

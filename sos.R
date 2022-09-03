@@ -12,9 +12,6 @@ library(wesanderson)
 library(ggthemes)
 library(patchwork)
 
-
-windowsFonts(TNM = windowsFont("Times New Roman"))
-
 #loading data of edc-sos
 sos <- read_excel("C:/Users/zhaiqiangrong/Desktop/雀巢/2027NRC_Data transfer_to BGI_20220729/2027NRC_FormExcel_2.0_20220729.xlsx", 
                   sheet = "MO_SOS")
