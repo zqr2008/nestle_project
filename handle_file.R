@@ -4,15 +4,11 @@ library(readxl)
 library(Hmisc)
 library(xlsx)
 
-#提取@之前的function
-function_split <- function(x){
-  holds = str_split(x, "@")
-  hold = holds[[1]][2]
-  return(hold)}
 #提取，加上label
 function_transfer <- function(y,label){
-  newdata = y %>%  dplyr::mutate_at(.vars = vars(1:dim(y)[2]),.funs = 
-                               function(x)ifelse(grepl("@",x),function_split(x),x))
+  newdata = y %>% rowwise() %>% 
+  dplyr::mutate_at(.vars = vars(1:dim(y)[2]),.funs = 
+                     function(x)ifelse(grepl("@",x),str_split(x, "@")[[1]][2],x))
   label(newdata) = label[1,]
   return(newdata)
 }
@@ -31,4 +27,7 @@ for (i in (1:length(list_all))){
   listA <- append(listA,list(function_transfer(
                     as.data.frame(list_all[i]),
                     as.data.frame(list_all_label[i]))))
-  }
+}
+
+###listB是处理好的所有dataframe的数据列表，直接可以用名称索引
+listB <- setNames(listA,name_of)
