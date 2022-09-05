@@ -61,12 +61,3 @@ fas2 <- FAS %>% group_by(SubjectNo) %>%
   dplyr::mutate_at(.vars = vars(3:5), .fun = function(x)ifelse(is.na(x),0,x)) %>%
   mutate(score = max(score1)+max(score2)+max(score3)) %>%
   filter(score==3) %>% distinct(SubjectNo)
-
-enrolled <- read_excel("C:/Users/zhaiqiangrong/Desktop/雀巢/2027NRC_Data transfer_to BGI_20220729/2027NRC_FormExcel_2.0_20220729.xlsx", 
-                       sheet = "DM")
-enrollY <- enrolled %>% filter(受试者状态=="入组") %>% 
-           summary(SubjectNo)
-enrollN <- enrolled %>% filter(受试者状态=="提前退出") %>%
-           summary(SubjectNo)
-
-
