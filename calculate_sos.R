@@ -109,7 +109,6 @@ merge_without_dup <- merge_join %>%
 
 merge_after<-rbind(merge_check_duplicate,merge_without_dup)
 
-
 merge_check <- merge_after %>%
   filter(MOORRES != VelocityMax)
 
@@ -122,7 +121,7 @@ merge_check_miss_inverse<-  merge_after %>%
   filter(is.na(MOORRES) == "TRUE"  & 
          is.na(VelocityMax) == "FALSE")
   
-merge3<-merge2 %>% left_join(fa,by=c("PatientId","数据节","SiteName")) 
+merge_bone<- merge_after %>% left_join(fa,by=c("PatientId","数据节","SiteName")) 
 merge3$`结果(FAORRES)`<-as.numeric(merge3$`结果(FAORRES)`)
 merge3$数据节<-factor(merge3$数据节)
 #merge3 <-merge3[complete.cases(merge3[,23]),]
