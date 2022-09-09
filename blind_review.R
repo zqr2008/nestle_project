@@ -22,12 +22,14 @@ QS9 <- QS9 %>%
   filter(trimws(QS9PERF) == "Yes") %>%
   select(SubjectNo,Instance)
 
-sos <- sos %>% 
-  filter(trimws(MOPERF) == "Yes") %>%
+sos <- sos %>%
+  mutate_at(.vars = vars(17),.funs = as.numeric) %>%
+  filter(is.na(MOORRES)) %>%
   select(SubjectNo,Instance)
 
 FA <- FA %>%
-  filter(trimws(FAPERF) == "Yes") %>%
+  mutate_at(.vars = vars(17),.funs = as.numeric) %>%
+  filter(is.na(FAORRESU) == "Yes") %>%
   select(SubjectNo,Instance)
 
 LB_RES <- LB_RES %>% 
