@@ -122,8 +122,7 @@ merge_check_miss_inverse<-  merge_after %>%
          is.na(VelocityMax) == "FALSE")
   
 merge_bone<- merge_after %>% left_join(fa,by=c("PatientId","数据节","SiteName")) 
-merge3$`结果(FAORRES)`<-as.numeric(merge3$`结果(FAORRES)`)
-merge3$数据节<-factor(merge3$数据节)
+
 #merge3 <-merge3[complete.cases(merge3[,23]),]
 
 
