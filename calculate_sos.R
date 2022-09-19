@@ -8,10 +8,10 @@ library(plyr)
 library(lubridate)
 library(fuzzyjoin)
 library(sqldf)
-
+library(labelled)
 #loading data of edc-sos
 sos <- as.data.frame(listB[["MO_SOS"]])
-fa <- as.data.frame(listB[["FA"]])
+
 #during data preparation, the machine generate 5 seperate sheet of data, the id was separated from the data
 #this part is for loading the sos data itself
 data1 <- read_excel("C:/Users/zhaiqiangrong/Desktop/雀巢/骨密度仪电脑记录数据/20220804/1/data1.xlsx")
@@ -40,11 +40,6 @@ sos <- sos %>%
   mutate_at(.vars = vars(14),.funs = function(x)as.numeric(as.Date(x))) %>%
   filter(str_detect(Instance,"G1-V6")=="FALSE") 
   
-
-fa$SubjectNo  <- substr(fa$SubjectNo,start = 8,stop = 13)
-fa <- fa %>% 
-  dplyr::rename(PatientId = SubjectNo,
-                    Site_bone = FALOC)
 
 
 #set loop list
@@ -112,7 +107,6 @@ merge_after<-rbind(merge_check_duplicate,merge_without_dup)
 merge_check <- merge_after %>%
   filter(MOORRES != VelocityMax)
 
-
 merge_check_miss <-  merge_after %>% 
   filter(is.na(MOORRES) == "FALSE"  & 
          is.na(VelocityMax) == "TRUE")
@@ -120,9 +114,23 @@ merge_check_miss <-  merge_after %>%
 merge_check_miss_inverse<-  merge_after %>% 
   filter(is.na(MOORRES) == "TRUE"  & 
          is.na(VelocityMax) == "FALSE")
-  
-merge_bone<- merge_after %>% left_join(fa,by=c("PatientId","数据节","SiteName")) 
 
+merge_for_analysis<-merge_after %>% select(PatientId,Site_bone,Instance,VelocityMax) 
+merge_for_analysis <- reshape::cast(
+  merge_for_analysis,PatientId+Instance ~Site_bone) 
+
+fa <- as.data.frame(listB[["FA"]])
+fa$SubjectNo  <- substr(fa$SubjectNo,start = 8,stop = 13)
+fa <- fa %>% 
+  dplyr::rename(PatientId = SubjectNo,
+                Site_bone = FALOC) %>%
+  select(PatientId,Instance,Site_bone,FAORRES)
+fa <-reshape::cast(fa,PatientId + Instance~ Site_bone)
+fa <- fa[,c(1,2,5,6)]
+fa <-remove_labels(fa)  
+merge_bone<- fa %>% left_join(merge_for_analysis,by=c("PatientId","Instance"),
+                                              suffix = c("length","sos")) 
+merge_bone$Instance<-trimws(merge_bone$Instance)
 #merge3 <-merge3[complete.cases(merge3[,23]),]
 
 

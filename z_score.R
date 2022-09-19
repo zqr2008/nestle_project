@@ -5,6 +5,7 @@ library(readxl)
 library(Hmisc)
 library(anthro)
 library(conflicted)
+library(labelled)
 
 
 #加载三张表，gender主要包含孩子性别信息，QS包含母亲的教育、孩子数量
@@ -17,11 +18,12 @@ QS2<-as.data.frame(listB[["QS2"]])
 gender2 <- gender %>% 
   dplyr::rename(delivery_mode = DELMETH)  %>%
   mutate(eth=case_when(str_detect(ETHNICITY,"Han") ~ "Han",
-                                         str_detect(ETHNICITY,"满族") ~ "Man",
-                                         str_detect(ETHNICITY,"蒙古族") ~ "Mongol",
-                                         str_detect(ETHNICITY,"回族")~ "Hui")) %>%
+                                         str_detect(ETHNICITY,"满") ~ "Man",
+                                         str_detect(ETHNICITY,"蒙古") ~ "Mongol",
+                                         str_detect(ETHNICITY,"回")~ "Hui",
+                                         str_detect(ETHNICITY,"朝鲜")~ "korean_chinese")) %>%
   mutate_at(.vars = vars(18), .funs = as.factor) %>%
-  select(SubjectNo,GROUPING,SEX,delivery_mode,eth) 
+  select(SubjectNo,GROUPING,SEX,delivery_mode,GESTAGE,eth) 
 
 #把性别统一编码
 gender2$SEX[trimws(gender2$SEX) == "Male"]<-"1"
@@ -76,21 +78,29 @@ summary1<- cbind(simple3,z_score) %>% #simple3代之前合成的基本信息表�
                                    abs(zlen)<2 &
                                    abs(zwei)<2 &
                                    abs(zwfl)<2 ~ "healthy",
-                                   TRUE ~ "unhealthy")) 
+                                   TRUE ~ "unhealthy"))  %>%
+  mutate(Instance = case_when(time == 0~ "G1-V1 (birth + 10 days)",
+                             time == 30~ "G1-V2 (1 month ± 15 days)",
+                             time == 90~ "G1-V3 (3 months ± 15 days)",
+                             time == 120~ "G1-V4 (4 months ± 15 days)",
+                             time == 180 & GROUPING == " Group 1" ~ "G1-V5 (6 months ± 15 days)",
+                             time == 180 & GROUPING == " Group 2" ~ "G2-V1 (6 months ± 15 days)",
+                             time == 270~ "G2-V2 (9 months ± 15 days)",
+                             time == 360~ "G2-V3 (12 months ± 15 days")) %>%
+  relocate(SubjectNo,Instance)  %>%
+  dplyr::rename(height = 身高,
+                weight = 体重)
 
 
-
-
-
-##用循环把所有时间点的结果输出
-##descrTable命令把各信息按照时间点描述数据
-for (i in 1:7){
-  x=summary1%>% filter(time==list1[i]) 
-  table=descrTable(delivery_mode~.,data=x,method = NA)
-  export2csv(table,name[i],sep=",",fileEncoding="GBK")
-}
-
-
+summary2 <- remove_labels(summary1) 
+summary2$PatientId <- substr(summary2$SubjectNo,start = 8,stop = 13)
+summary2 <- merge_bone %>%
+  left_join(summary2,by=c("PatientId","Instance")) %>% 
+  dplyr::rename(tibia_sos =`胫骨 (左)sos`,
+         radius_sos = `桡骨 (左)sos`,
+         tibia_length = `胫骨 (左)length`,
+         radius_length = `桡骨 (左)length`)
+                               
 
 
 #以下为描述性函数，可以不看
