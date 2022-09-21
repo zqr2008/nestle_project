@@ -10,23 +10,37 @@ library(doBy)
 
 filter <- dplyr::filter
 
-sos_1month <- summary2 %>% filter( time == 0) %>%
-  select(c(3:6))
+sos_1month <- summary2 %>% 
+  select(time,c(3:6))
 
 tbl_summary(
   sos_1month,
+  by = time,
   # split table by group
   missing = "no",
   type = all_continuous() ~ "continuous2",
   statistic =all_continuous() ~ c("{median} ({p25}, {p75})", "{min}, {max}")# don't list missing data separately
 ) %>%
-  add_n() %>% # add column with total number of non-missing observations
-  add_p() %>% # test for a difference between groups
+  add_n() %>% # add column with total number of non-missing observations # test for a difference between groups
   modify_header(label = "**Variable**") %>% # update the column header
   bold_labels()
 
 
 
+tibia_z <- z_para %>% 
+  select(time,c(41:42))
+
+tbl_summary(
+  tibia_z,
+  by = time,
+  # split table by group
+  missing = "no",
+  type = all_continuous() ~ "continuous2",
+  statistic =all_continuous() ~ c("{median} ({p25}, {p75})", "{min}, {max}")# don't list missing data separately
+) %>%
+  add_n() %>% # add column with total number of non-missing observations # test for a difference between groups
+  modify_header(label = "**Variable**") %>% # update the column header
+  bold_labels()
 
 
 
@@ -51,15 +65,15 @@ GROUP_2_table1 <- summary1  %>%
   select(time,delivery_mode,weight,height,bmi,zwei,zlen,zwfl,zbmi) %>%
   mutate(time_delivery = paste(time,delivery_mode,sep = "-")) %>%
   select(-time,-delivery_mode)
-  
+
 g1_table1 <- tbl_summary(
-    GROUP_1_table1,
-    by = time_delivery,
-    # split table by group
-    missing = "no",
-    type = all_continuous() ~ "continuous2",
-    statistic =all_continuous() ~ c("{median} ({p25}, {p75})", "{min}, {max}")# don't list missing data separately
-  ) %>%
+  GROUP_1_table1,
+  by = time_delivery,
+  # split table by group
+  missing = "no",
+  type = all_continuous() ~ "continuous2",
+  statistic =all_continuous() ~ c("{median} ({p25}, {p75})", "{min}, {max}")# don't list missing data separately
+) %>%
   add_n() %>% # add column with total number of non-missing observations
   add_p() %>% # test for a difference between groups
   modify_header(label = "**Variable**") %>% # update the column header
@@ -78,7 +92,7 @@ g1_table2 <- tbl_summary(
   add_p() %>% # test for a difference between groups
   modify_header(label = "**Variable**") %>% # update the column header
   bold_labels()
-  
+
 
 g2_table1 <- tbl_summary(
   GROUP_2_table1,
@@ -94,9 +108,9 @@ g2_table1 <- tbl_summary(
   bold_labels()
 
 
-as_gt(g1_table1) %>% gt::gtsave("C:/Users/zhaiqiangrong/Desktop/雀巢/interim/group1_by_delivery.png",expand =10)
-as_gt(g1_table2) %>% gt::gtsave("C:/Users/zhaiqiangrong/Desktop/雀巢/interim/group1_by_feeding.png",expand =10)
-as_gt(g2_table1) %>% gt::gtsave("C:/Users/zhaiqiangrong/Desktop/雀巢/interim/group2_by_delivery.png",expand =15)
+as_gt(g1_table1) %>% gt::gtsave("C:/Users/zhaiqiangrong/Desktop/??????/interim/group1_by_delivery.png",expand =10)
+as_gt(g1_table2) %>% gt::gtsave("C:/Users/zhaiqiangrong/Desktop/??????/interim/group1_by_feeding.png",expand =10)
+as_gt(g2_table1) %>% gt::gtsave("C:/Users/zhaiqiangrong/Desktop/??????/interim/group2_by_delivery.png",expand =15)
 
 
 propensity <- summary1 %>% 
@@ -119,7 +133,7 @@ anthro_weight <- propensity %>%
   filter(str_detect(Instance,"birth") =="FALSE")
 
 lmer_mode <- anthro_weight %>% left_join(anthro_at_birth,
-                                      by="SubjectNo") %>%
+                                         by="SubjectNo") %>%
   select(SubjectNo,weight,weight_at_birth,Instance,feeding_type_2,ps.weights.IPW) %>%
   drop_na(weight)
 

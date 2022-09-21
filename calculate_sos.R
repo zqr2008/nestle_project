@@ -129,7 +129,8 @@ fa <-reshape::cast(fa,PatientId + Instance~ Site_bone)
 fa <- fa[,c(1,2,5,6)]
 fa <-remove_labels(fa)  
 merge_bone<- fa %>% left_join(merge_for_analysis,by=c("PatientId","Instance"),
-                                              suffix = c("length","sos")) 
+                                              suffix = c("length","sos")) %>%
+  mutate_at(.vars = vars(3:4), .funs = as.numeric)
 merge_bone$Instance<-trimws(merge_bone$Instance)
 #merge3 <-merge3[complete.cases(merge3[,23]),]
 

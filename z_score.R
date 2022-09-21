@@ -86,7 +86,7 @@ summary1<- cbind(simple3,z_score) %>% #simple3代之前合成的基本信息表�
                              time == 180 & GROUPING == " Group 1" ~ "G1-V5 (6 months ± 15 days)",
                              time == 180 & GROUPING == " Group 2" ~ "G2-V1 (6 months ± 15 days)",
                              time == 270~ "G2-V2 (9 months ± 15 days)",
-                             time == 360~ "G2-V3 (12 months ± 15 days")) %>%
+                             time == 360~ "G2-V3 (12 months ± 15 days)")) %>%
   relocate(SubjectNo,Instance)  %>%
   dplyr::rename(height = 身高,
                 weight = 体重)
@@ -99,9 +99,16 @@ summary2 <- merge_bone %>%
   dplyr::rename(tibia_sos =`胫骨 (左)sos`,
          radius_sos = `桡骨 (左)sos`,
          tibia_length = `胫骨 (左)length`,
-         radius_length = `桡骨 (左)length`)
-                               
+         radius_length = `桡骨 (左)length`) %>%
+  filter(Instance!="G1-V6 (9 months ± 15 days)")
+summary2$SEX<-factor(summary2$SEX,levels = c("1","2"),
+                     labels = c("male","female"))   
 
+summary2_sos <- summary2
+save(summary2_sos, file = "summary2_sos.rda")
+
+write.table(summary1,file="C:/Users/zhaiqiangrong/Desktop/雀巢/summary1.csv",sep=",",fileEncoding="GBK",row.names = F)
+write.table(summary2,file="C:/Users/zhaiqiangrong/Desktop/雀巢/summary2.csv",sep=",",fileEncoding="GBK",row.names = F)
 
 #以下为描述性函数，可以不看
 #table1<-descrTable(~.,data=summary1)
@@ -119,10 +126,3 @@ temp<- simple3 %>%
   mutate(weight_diff=tsibble::difference(体重,differences = 1)) %>%
   filter(weight_diff==0  | hei_diff== 0)
 
-#at_birth<-summary1%>% filter(time==0)
-#month_1<-summary1%>% filter(time==30)
-#month_3<-summary1%>% filter(time==90)
-#month_4<-summary1%>% filter(time==120)
-#month_6<-summary1%>% filter(time==180)
-#month_9<-summary1%>% filter(time==270)
-#month_12<-summary1%>% filter(time==360)
