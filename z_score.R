@@ -13,6 +13,7 @@ library(labelled)
 gender <- as.data.frame(listB[["DM"]])
 wei_and_hei <- as.data.frame(listB[["VS"]])
 QS2<-as.data.frame(listB[["QS2"]])
+MH <- as.data.frame(listB[["MH"]])
 
 #民族的字符串统一
 gender2 <- gender %>% 
@@ -106,6 +107,12 @@ summary2$SEX<-factor(summary2$SEX,levels = c("1","2"),
 
 summary2_sos <- summary2
 save(summary2_sos, file = "summary2_sos.rda")
+
+
+summary3<- MH %>% dplyr:: filter( trimws(MHYN) == "Yes") %>%
+  distinct(SubjectNo) %>% mutate(medical_history = "Yes") %>%
+  right_join(summary1,by = "SubjectNo") %>% 
+  mutate_at(.vars = vars(2), .funs =  function(x)ifelse(is.na(x),"No",x))
 
 write.table(summary1,file="C:/Users/zhaiqiangrong/Desktop/雀巢/summary1.csv",sep=",",fileEncoding="GBK",row.names = F)
 write.table(summary2,file="C:/Users/zhaiqiangrong/Desktop/雀巢/summary2.csv",sep=",",fileEncoding="GBK",row.names = F)

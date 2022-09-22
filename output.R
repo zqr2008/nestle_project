@@ -5,8 +5,8 @@ library(PSweight)
 library(lme4)
 library(afex)
 library(conflicted)
-library(performance)
 library(doBy)
+library(ggResidpanel)
 
 filter <- dplyr::filter
 
@@ -137,20 +137,15 @@ lmer_mode <- anthro_weight %>% left_join(anthro_at_birth,
   select(SubjectNo,weight,weight_at_birth,Instance,feeding_type_2,ps.weights.IPW) %>%
   drop_na(weight)
 
-lmer_mode.mod <- lmer(weight~ weight_at_birth + Instance + 
+lmer_mode.mod <- lme4::lmer(weight~ weight_at_birth + Instance + 
                         feeding_type_2 + Instance*feeding_type_2 +
                         (1|SubjectNo), weights = ps.weights.IPW,
                       data=lmer_mode)
 
 mixed(lmer_mode.mod, data = lmer_mode, weights = lmer_mode$ps.weights.IPW)
 summary_weight <- summary(lmer_mode.mod)
-dev.new(width=8, height=6)
-check_model(lmer_mode.mod)
+
+resid_panel(lmer_mode.mod)
 LSmeans(lmer_mode.mod)
 
 
-
-
-
-dev.new()
-dev.off()

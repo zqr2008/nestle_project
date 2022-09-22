@@ -87,5 +87,5 @@ group<- group_ration %>%
 write.table(group2,file="C:/Users/zhaiqiangrong/Desktop/雀巢/group.csv",sep=",",fileEncoding="GBK",row.names = F)
 
 #group2是为元信息表做准备，去重
-group2<-group%>%
+group2<-group %>% filter(is.na(feeding_type_2) == "FALSE") %>%
   distinct(SubjectNo,.keep_all = TRUE)  
