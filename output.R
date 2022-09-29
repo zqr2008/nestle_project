@@ -7,6 +7,8 @@ library(afex)
 library(conflicted)
 library(doBy)
 library(ggResidpanel)
+library(animation)
+
 
 filter <- dplyr::filter
 
@@ -108,42 +110,68 @@ g2_table1 <- tbl_summary(
   bold_labels()
 
 
-as_gt(g1_table1) %>% gt::gtsave("C:/Users/zhaiqiangrong/Desktop/??????/interim/group1_by_delivery.png",expand =10)
-as_gt(g1_table2) %>% gt::gtsave("C:/Users/zhaiqiangrong/Desktop/??????/interim/group1_by_feeding.png",expand =10)
-as_gt(g2_table1) %>% gt::gtsave("C:/Users/zhaiqiangrong/Desktop/??????/interim/group2_by_delivery.png",expand =15)
-
+#propensity score
+list_anth <- c("height","weight","bmi","zwei","zlen","zwfl","zbmi")
 
 propensity <- summary1 %>% 
-  dplyr::filter(is.na(feeding_type_2)== "FALSE" & is.na(eth)== "FALSE")  %>%
-  select(SubjectNo,Instance,weight,feeding_type_2,SEX,eth,GESTAGE,delivery_mode,education)
+  dplyr::filter(is.na(feeding_type_2)== "FALSE")  %>%
+  select(SubjectNo,Instance,list_anth,feeding_type_2,SEX,eth,GESTAGE,delivery_mode,child_number,education)
 
-ps.mult <- as.factor(feeding_type_2) ~ as.factor(SEX) + as.factor(eth) + as.numeric(GESTAGE) +  as.factor(delivery_mode) + as.factor(education)
+ps.mult <- as.factor(feeding_type_2) ~ as.factor(SEX) + as.factor(eth) + 
+           as.numeric(GESTAGE) + as.factor(delivery_mode) + 
+           as.numeric(child_number) + as.factor(education)
+
 bal.mult <- SumStat(ps.formula = ps.mult, data = propensity, weight = c("IPW"))
-weightss<-as.data.frame(bal.mult["ps.weights"])
-propensity <- cbind(propensity,weightss) 
+plot(bal.mult, type = "density") 
 
-anthro_at_birth<-propensity %>%
-  pivot_wider(names_from = "Instance",
-              names_prefix = "weight",
-              values_from = "weight") %>%
-  dplyr::rename(weight_at_birth =`weightG1-V1 (birth + 10 days)`) %>%
-  select(SubjectNo,weight_at_birth)
+#plot difference 
+pdf("propensity.pdf",width=25,height=10)
+plot(bal.mult, type = "balance", metric = "PSD",cex.axis=2.5)
+dev.off() 
 
-anthro_weight <- propensity %>%
+#combine into one
+weightss <- as.data.frame(bal.mult["ps.weights"])
+propensity_score <- cbind(propensity,weightss) 
+
+anthro_other_time <- propensity_score %>%
   filter(str_detect(Instance,"birth") =="FALSE")
 
-lmer_mode <- anthro_weight %>% left_join(anthro_at_birth,
-                                         by="SubjectNo") %>%
-  select(SubjectNo,weight,weight_at_birth,Instance,feeding_type_2,ps.weights.IPW) %>%
-  drop_na(weight)
 
-lmer_mode.mod <- lme4::lmer(weight~ weight_at_birth + Instance + 
+# mixed liner model building in loop for each variable
+
+list_model <- list()
+saveGIF(for (x in (1:7)){
+  anthro_at_birth <- propensity_score %>% 
+  select(SubjectNo,Instance,list_anth[x]) %>%
+  pivot_wider(names_from = "Instance",
+              names_prefix = list_anth[x],
+              values_from = list_anth[x]) %>%
+  dplyr::rename(!!paste0("at_birth",sep = "_",list_anth[x]) := 2) %>%
+  select(1:2) 
+  
+  para_at_birth <- noquote(paste0("at_birth",sep = "_",list_anth[x]))
+  anth <- noquote(list_anth[x])
+  
+  lmer_mode <- anthro_other_time %>% 
+    left_join(anthro_at_birth, by = "SubjectNo")  %>%
+    drop_na(list_anth[x])
+
+  lmer_mode.mod <- lme4::lmer(get(anth)~ get(para_at_birth) + Instance + 
                         feeding_type_2 + Instance*feeding_type_2 +
                         (1|SubjectNo), weights = ps.weights.IPW,
-                      data=lmer_mode)
+                      data = lmer_mode)
+  
+  print(resid_panel(lmer_mode.mod,title.opt = TRUE))
+})
 
-mixed(lmer_mode.mod, data = lmer_mode, weights = lmer_mode$ps.weights.IPW)
+
+
+afex::mixed(lmer_mode.mod, data = lmer_mode, weights = lmer_mode$ps.weights.IPW)
+
 summary_weight <- summary(lmer_mode.mod)
+
+
+
 
 resid_panel(lmer_mode.mod)
 LSmeans(lmer_mode.mod)

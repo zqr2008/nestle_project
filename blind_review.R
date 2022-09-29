@@ -4,6 +4,10 @@ library(tidyverse)
 library(conflicted)
 library(daff)
 library(gtsummary)
+library(readxl)
+library(labelled)
+
+pd <- read_excel("C:/Users/zhaiqiangrong/Desktop/雀巢/2027NRC_PD listing_20220926_PD_review.xlsx")
 
 filter <- dplyr::filter
 #粪便样本采集数据集  对应co-primary endpoints-Microbiome maturation trajectory
@@ -17,12 +21,20 @@ FA <- as.data.frame(listB[["FA"]])
 #是否进行母乳采集  对应co-primary endpoints- Levels of HMOs
 LB_RES <- as.data.frame(listB[["LB_RES"]])
 
+
+
+pd <- pd %>% filter(`Impact analysis` == "Impact") %>%
+  distinct(Subject) %>%
+  rename(SubjectNo = Subject)
+
+
 DM <- as.data.frame(listB[["DM"]])
 table(DM$SubjectStatus)
 DM <- DM %>% filter(SubjectStatus == " Enrolled") %>%
   select(SubjectNo) %>% left_join(group2, by ="SubjectNo")
  
-#原则筛选这五个数据集里面“是”或非缺失部分
+
+
 LB3 <- LB3 %>% 
   dplyr::filter(trimws(LB3PERF)=="Yes") %>% 
   select(SubjectNo,Instance)
@@ -64,8 +76,9 @@ fas1 <- FAS %>% group_by(SubjectNo) %>%
                               max(score4)+max(score5)) %>%
                filter(score==5) %>% distinct(SubjectNo) %>%
   left_join(group2,by= "SubjectNo")
-  
 
+fas1 <- remove_labels(fas1) %>% mutate(SubjectNo=as.character(SubjectNo))
+pp1 <- fas1 %>% anti_join(pd, by="SubjectNo")
 
 
 fas2 <- FAS %>% group_by(SubjectNo) %>%
@@ -76,6 +89,10 @@ fas2 <- FAS %>% group_by(SubjectNo) %>%
   dplyr::mutate_at(.vars = vars(3:5), .fun = function(x)ifelse(is.na(x),0,x)) %>%
   mutate(score = max(score1)+max(score2)+max(score3)) %>%
   filter(score==3) %>% distinct(SubjectNo) 
+
+
+fas2 <- remove_labels(fas2) %>% mutate(SubjectNo=as.character(SubjectNo))
+pp2 <- fas2 %>% anti_join(pd, by="SubjectNo")
 
 a<-as.data.frame(fas1$SubjectNo)
 b<-as.data.frame(group2$SubjectNo)
