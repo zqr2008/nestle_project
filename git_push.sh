@@ -1,5 +1,6 @@
-cd nestle_project
+
+git pull
 git init
 git add . 
 git commit -m "message" 
-git push origin main 
+git push origin main
