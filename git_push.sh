@@ -1,3 +1,7 @@
+git config --global -l
+
+git config --global --unset http.proxy
+
 
 git init
 git add . 
