@@ -9,43 +9,6 @@ library(doBy)
 library(ggResidpanel)
 library(animation)
 
-
-filter <- dplyr::filter
-
-sos_1month <- summary2 %>% 
-  select(time,c(3:6))
-
-tbl_summary(
-  sos_1month,
-  by = time,
-  # split table by group
-  missing = "no",
-  type = all_continuous() ~ "continuous2",
-  statistic =all_continuous() ~ c("{median} ({p25}, {p75})", "{min}, {max}")# don't list missing data separately
-) %>%
-  add_n() %>% # add column with total number of non-missing observations # test for a difference between groups
-  modify_header(label = "**Variable**") %>% # update the column header
-  bold_labels()
-
-
-
-tibia_z <- z_para %>% 
-  select(time,c(41:42))
-
-tbl_summary(
-  tibia_z,
-  by = time,
-  # split table by group
-  missing = "no",
-  type = all_continuous() ~ "continuous2",
-  statistic =all_continuous() ~ c("{median} ({p25}, {p75})", "{min}, {max}")# don't list missing data separately
-) %>%
-  add_n() %>% # add column with total number of non-missing observations # test for a difference between groups
-  modify_header(label = "**Variable**") %>% # update the column header
-  bold_labels()
-
-
-
 #propensity score
 list_anth <- c("height","weight","bmi","zwei","zlen","zwfl","zbmi")
 
