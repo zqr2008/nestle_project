@@ -69,9 +69,6 @@ afex::mixed(lmer_mode.mod, data = lmer_mode, weights = lmer_mode$ps.weights.IPW)
 
 summary_weight <- summary(lmer_mode.mod)
 
-
-
-
 resid_panel(lmer_mode.mod)
 LSmeans(lmer_mode.mod)
 
